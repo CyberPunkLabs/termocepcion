@@ -1,6 +1,6 @@
 # termocepcion
 
-Tutorial simple de github ("Hello world!"):
+Tutorial simple de Github ("Hello world!"):<br>
 https://guides.github.com/activities/hello-world/
 
 
