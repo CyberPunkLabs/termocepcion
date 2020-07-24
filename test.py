@@ -1,19 +1,9 @@
-import atexit
-import time
-import numpy
-#import matplotlib.pyplot as pyplot
-
-from Chamber import *
-from Pid import *
-from SetPoint import *
+import serial
 
 port = '/dev/ttyUSB0'
 
-
-chamber = Chamber(port)
+uart = serial.Serial(port, baudrate = 115_200, bytesize = 8, parity = 'N', stopbits = 1, timeout = 0)
 
 while True:
-    temp = chamber.read()
-
-    if len(temp) > 0:
-        print(temp)
+    If uart.in_waiting > 0:
+        print(uart.read(uart.in_waiting))
