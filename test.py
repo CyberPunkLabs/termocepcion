@@ -1,7 +1,7 @@
 import atexit
 import time
 import numpy
-#import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as pyplot
 
 from Chamber import *
 from Pid import *
@@ -9,11 +9,8 @@ from SetPoint import *
 
 port = '/dev/ttyUSB0'
 
-
-chamber = Chamber(port)
-
 while True:
-    temp = chamber.read()
+    uart = serial.Serial(port, baudrate = 115_200, bytesize = 8, parity = ‘N’, stopbits = 1, timeout = 0)
 
-    if len(temp) > 0:
-        print(temp)
+    if uart.in_waiting > 0:
+        print(uart.read(self._uart.in_waiting))
