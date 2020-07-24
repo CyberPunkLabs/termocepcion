@@ -1,7 +1,7 @@
 # termocepcion
 
 Tutorial simple de Github ("Hello world!" -- Proyecto construido con este tutorial):<br>
-https://guides.github.com/activities/hello-world/
+https://guides.github.com/activities/hello-world/<br>
 https://product.hubspot.com/blog/git-and-github-tutorial-for-beginners
 
 Tutorial avanzado de git:<br>
