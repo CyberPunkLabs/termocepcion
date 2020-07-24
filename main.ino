@@ -1,34 +1,41 @@
+// Importalos modulos requeridos
 #include <OneWire.h>
 
-
+// Define modo simple (1 peltier) versus modo DUAL (2 peltiers).
+// Descomentar para DUAL
 //#define DUAL
 
-
+// Define los GPIO 18 y 19 como los outputs para controlar el puente H, 
+// y el GPIO 13 como sensor de temperatura (ver diagrma circuito)
 uint16_t peltier0h = 18;
 uint16_t peltier0c = 19;
 uint16_t sensor0 = 13;
 
+// Si modo DUAL, define los GPIOs y el sensor para el segundo peltier
 #ifdef DUAL
 uint16_t peltier1h = 0;
 uint16_t peltier1c = 0;
 uint16_t sensor1 = 0;
 #endif
 
+// Resolucion y frecuencia para el PWM
 uint8_t  resolution = 13;
 double   frequency  = 10000;
 
-
+// Implemente instancia de sensor OneWire (DALLAS DS18B20)
 OneWire ds(sensor0);
 
 int t0;
 int t1 = millis();
 
-
+// Loop de inicializacion
 void setup(void) 
 {
     Serial.begin(115200);
 
+    // ledcSetup(ledChannel, freq, resolution);
     ledcSetup(0, frequency, resolution);
+    // The first is the GPIO that will output the signal, and the second is the channel that will generate the signal.
     ledcAttachPin(peltier0h, 0);
 
     ledcSetup(1, frequency, resolution);
@@ -64,6 +71,9 @@ void loop(void)
             Serial.read();
         }
         
+        // PREGUNTA:
+        // Que es "0x3F"? Se puede escribir de un modo mas
+        // intuitivo o accesible?
         uint32_t dutyCycle1 = ((static_cast<uint32_t>(packet[1]) & 0x3F) << 7) | (static_cast<uint32_t>(packet[0]) & 0x7F);
         bool polarity0 = packet[1] & 0x40;
         
@@ -74,6 +84,7 @@ void loop(void)
 
         if (polarity0)
         {
+            // This function accepts as arguments the channel that is generating the PWM signal, and the duty cycle.
             ledcWrite(0, 0);
             ledcWrite(1, dutyCycle1);
         }
