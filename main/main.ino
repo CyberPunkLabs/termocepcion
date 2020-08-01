@@ -1,16 +1,15 @@
 #include <OneWire.h>
 
 
-//#define DUAL
-
+#define DUAL
 
 uint16_t peltier0h = 18;
 uint16_t peltier0c = 19;
 uint16_t sensor0 = 13;
 
 #ifdef DUAL
-uint16_t peltier1h = 0;
-uint16_t peltier1c = 0;
+uint16_t peltier1h = 22;
+uint16_t peltier1c = 23;
 uint16_t sensor1 = 0;
 #endif
 
