@@ -1,27 +1,25 @@
 #include <OneWire.h>
 
-
-#define DUAL
+// Settings
 
 uint16_t peltier0h = 18;
 uint16_t peltier0c = 19;
-uint16_t sensor0 = 13;
-
-#ifdef DUAL
 uint16_t peltier1h = 22;
 uint16_t peltier1c = 23;
+
+uint16_t sensor0 = 13;
 uint16_t sensor1 = 0;
-#endif
 
 uint8_t  resolution = 13;
 double   frequency  = 10000;
 
+OneWire ds0(sensor0);
+OneWire ds1(sensor0);
 
-OneWire ds(sensor0);
+// Code
 
 int t0;
 int t1 = millis();
-
 
 void setup(void) 
 {
@@ -33,13 +31,11 @@ void setup(void)
     ledcSetup(1, frequency, resolution);
     ledcAttachPin(peltier0c, 1);
 
-    #ifdef DUAL
     ledcSetup(2, frequency, resolution);
     ledcAttachPin(peltier1h, 0);
 
     ledcSetup(3, frequency, resolution);
     ledcAttachPin(peltier1c, 1);
-    #endif
 }
 
 void loop(void)
@@ -63,91 +59,128 @@ void loop(void)
             Serial.read();
         }
         
-        uint32_t dutyCycle1 = ((static_cast<uint32_t>(packet[1]) & 0x3F) << 7) | (static_cast<uint32_t>(packet[0]) & 0x7F);
-        bool polarity0 = packet[1] & 0x40;
+        uint32_t dutyCycle0 = ((static_cast<uint32_t>(packet[1]) & 0x3F) << 7) | (static_cast<uint32_t>(packet[0]) & 0x7F);
+        uint32_t dutyCycle1 = ((static_cast<uint32_t>(packet[3]) & 0x3F) << 7) | (static_cast<uint32_t>(packet[2]) & 0x7F);
         
-        #ifdef DUAL
-        uint32_t dutyCycle2 = ((static_cast<uint32_t>(packet[3]) & 0x3F) << 7) | (static_cast<uint32_t>(packet[2]) & 0x7F);
+        bool polarity0 = packet[1] & 0x40;
         bool polarity1 = packet[3] & 0x40;
-        #endif
 
         if (polarity0)
         {
             ledcWrite(0, 0);
-            ledcWrite(1, dutyCycle1);
+            ledcWrite(1, dutyCycle0);
         }
         else
         {
+            ledcWrite(0, dutyCycle0);
             ledcWrite(1, 0);
-            ledcWrite(0, dutyCycle1);
         }
         
-        #ifdef DUAL
         if (polarity1)
         {
             ledcWrite(2, 0);
-            ledcWrite(3, dutyCycle2);
+            ledcWrite(3, dutyCycle1);
         }
         else
         {
+            ledcWrite(2, dutyCycle1);
             ledcWrite(3, 0);
-            ledcWrite(2, dutyCycle2);
         }
-        #endif
     }
 
     t0 = millis();
 
     if (t0 - t1 > 750)
     {
-        byte data[12];
-        byte addr[8];
-        float celsius;
+        byte data0[12];
+        byte data1[12];
 
-        if (!ds.search(addr)) 
+        byte addr0[8];
+        byte addr1[8];
+        
+        if (!ds0.search(addr0)) 
         {
-            ds.reset_search();
+            ds0.reset_search();
+            return;
+        }
+        
+        if (!ds1.search(addr1)) 
+        {
+            ds1.reset_search();
             return;
         }
 
-        if (OneWire::crc8(addr, 7) != addr[7])
+        if (OneWire::crc8(addr0, 7) != addr0[7])
             return;
 
-        ds.reset();
-        ds.select(addr);
-        ds.write(0x44, 1);
+        if (OneWire::crc8(addr1, 7) != addr1[7])
+            return;
+        
+        ds0.reset();
+        ds0.select(addr0);
+        ds0.write(0x44, 1);
 
-        ds.reset();
-        ds.select(addr);    
-        ds.write(0xBE);
+        ds0.reset();
+        ds0.select(addr0);    
+        ds0.write(0xBE);
+
+        ds1.reset();
+        ds1.select(addr1);
+        ds1.write(0x44, 1);
+        
+        ds1.reset();
+        ds1.select(addr1);    
+        ds1.write(0xBE);
+        
+        for (int i = 0; i < 9; i++)
+            data0[i] = ds0.read();
 
         for (int i = 0; i < 9; i++)
-            data[i] = ds.read();
-
-        int16_t raw = (data[1] << 8) | data[0];
-
-        switch (data[4] & 0x60)
+            data1[i] = ds1.read();
+        
+        int16_t raw0 = (data0[1] << 8) | data0[0];
+        int16_t raw1 = (data1[1] << 8) | data1[0];
+        
+        switch (data0[4] & 0x60)
         {
             case 0x00:
-                raw = raw & ~7;    // 9 bit resolution, 93.75 ms    
+                raw0 = raw0 & ~7;    // 9 bit resolution, 93.75 ms    
                 break;
 
             case 0x20:
-                raw = raw & ~3;    // 10 bit res, 187.5 ms
+                raw0 = raw0 & ~3;    // 10 bit res, 187.5 ms
                 break;
 
             case 0x40:
-                raw = raw & ~1;    // 11 bit res, 375 ms
+                raw0 = raw0 & ~1;    // 11 bit res, 375 ms
                 break;
         }
 
-        uint8_t lsb = (raw & 0x3F) | 0xC0;
-        uint8_t msb = (raw >> 6) & 0x3F;
+        switch (data1[4] & 0x60)
+        {
+            case 0x00:
+                raw1 = raw1 & ~7;    // 9 bit resolution, 93.75 ms    
+                break;
 
-        Serial.write(lsb);
-        Serial.write(msb);
-        Serial.write(0);
-        Serial.write(0);
+            case 0x20:
+                raw1 = raw1 & ~3;    // 10 bit res, 187.5 ms
+                break;
+
+            case 0x40:
+                raw1 = raw1 & ~1;    // 11 bit res, 375 ms
+                break;
+        }
+        
+        uint8_t lsb0 = (raw0 & 0x3F) | 0xC0;
+        uint8_t msb0 = (raw0 >> 6) & 0x3F;
+
+        uint8_t lsb1 = (raw1 & 0x3F) | 0xC0;
+        uint8_t msb1 = (raw1 >> 6) & 0x3F;
+        
+        Serial.write(lsb0);
+        Serial.write(msb0);
+        Serial.write(lsb1);
+        Serial.write(msb1);
 
         t1 = t0;
     }
