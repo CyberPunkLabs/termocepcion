@@ -101,20 +101,28 @@ void loop(void)
         if (!ds0.search(addr0)) 
         {
             ds0.reset_search();
+            Serial.print("1");
             return;
         }
         
         if (!ds1.search(addr1)) 
         {
             ds1.reset_search();
+            Serial.print("2");
             return;
         }
 
         if (OneWire::crc8(addr0, 7) != addr0[7])
+        {
+            Serial.print("3");
             return;
+        }
 
         if (OneWire::crc8(addr1, 7) != addr1[7])
+        {
+            Serial.print("4");
             return;
+        }
         
         ds0.reset();
         ds0.select(addr0);
