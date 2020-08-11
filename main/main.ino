@@ -8,7 +8,7 @@ uint16_t peltier1h = 22;
 uint16_t peltier1c = 23;
 
 uint16_t sensor0 = 13;
-uint16_t sensor1 = 0;
+uint16_t sensor1 = 14;
 
 uint8_t  resolution = 13;
 double   frequency  = 10000;
