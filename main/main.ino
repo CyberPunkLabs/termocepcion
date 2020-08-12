@@ -190,8 +190,10 @@ void loop(void)
         //Serial.write(lsb1);
         //Serial.write(msb1);
         
-        Serial.print(raw0 / 16)
-        Serial.print(raw1 / 16)
+        Serial.print(raw0 / 16);
+        Serial.print(", ");
+        Serial.print(raw1 / 16);
+        Serial.print("\n");
 
         t1 = t0;
     }
