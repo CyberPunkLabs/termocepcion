@@ -1,0 +1,69 @@
+// Settings
+
+uint16_t peltier0h = 18;
+uint16_t peltier0c = 19;
+uint16_t peltier1h = 22;
+uint16_t peltier1c = 23;
+
+uint8_t  resolution = 13;
+double   frequency  = 10000;
+
+int = 1
+
+void setup(void) 
+{
+    Serial.begin(115200);
+
+    ledcSetup(0, frequency, resolution);
+    ledcAttachPin(peltier0h, 0);
+
+    ledcSetup(1, frequency, resolution);
+    ledcAttachPin(peltier0c, 1);
+
+    ledcSetup(2, frequency, resolution);
+    ledcAttachPin(peltier1h, 0);
+
+    ledcSetup(3, frequency, resolution);
+    ledcAttachPin(peltier1c, 1);
+}
+
+int d = 30000;
+
+void loop(void)
+{
+
+    Serial.println("0000"); 
+    ledcWrite(0, 0);
+    ledcWrite(1, 0);
+    ledcWrite(2, 0);
+    ledcWrite(3, 0);
+    delay(d);
+
+    Serial.println("1000"); 
+    ledcWrite(0, 1);
+    ledcWrite(1, 0);
+    ledcWrite(2, 0);
+    ledcWrite(3, 0);
+    delay(d);
+
+    Serial.println("0100"); 
+    ledcWrite(0, 0);
+    ledcWrite(1, 1);
+    ledcWrite(2, 0);
+    ledcWrite(3, 0);
+    delay(d);
+
+    Serial.println("0010"); 
+    ledcWrite(0, 0);
+    ledcWrite(1, 0);
+    ledcWrite(2, 1);
+    ledcWrite(3, 0);
+    delay(d);
+
+    Serial.println("0001"); 
+    ledcWrite(0, 0);
+    ledcWrite(1, 0);
+    ledcWrite(2, 0);
+    ledcWrite(3, 1);
+    delay(d);
+}

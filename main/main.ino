@@ -14,7 +14,7 @@ uint8_t  resolution = 13;
 double   frequency  = 10000;
 
 OneWire ds0(sensor0);
-OneWire ds1(sensor0);
+OneWire ds1(sensor1);
 
 // Code
 
@@ -32,10 +32,10 @@ void setup(void)
     ledcAttachPin(peltier0c, 1);
 
     ledcSetup(2, frequency, resolution);
-    ledcAttachPin(peltier1h, 0);
+    ledcAttachPin(peltier1h, 2);
 
     ledcSetup(3, frequency, resolution);
-    ledcAttachPin(peltier1c, 1);
+    ledcAttachPin(peltier1c, 3);
 }
 
 void loop(void)
@@ -101,28 +101,17 @@ void loop(void)
         if (!ds0.search(addr0)) 
         {
             ds0.reset_search();
-            Serial.print("1");
             return;
         }
         
         if (!ds1.search(addr1)) 
         {
             ds1.reset_search();
-            Serial.print("2");
             return;
         }
 
-        if (OneWire::crc8(addr0, 7) != addr0[7])
-        {
-            Serial.print("3");
+        if ((OneWire::crc8(addr0, 7) != addr0[7]) || (OneWire::crc8(addr1, 7) != addr1[7]))
             return;
-        }
-
-        if (OneWire::crc8(addr1, 7) != addr1[7])
-        {
-            Serial.print("4");
-            return;
-        }
         
         ds0.reset();
         ds0.select(addr0);
@@ -182,18 +171,18 @@ void loop(void)
         uint8_t lsb0 = (raw0 & 0x3F) | 0xC0;
         uint8_t msb0 = (raw0 >> 6) & 0x3F;
 
-        uint8_t lsb1 = (raw1 & 0x3F) | 0xC0;
+        uint8_t lsb1 = (raw1 & 0x3F);
         uint8_t msb1 = (raw1 >> 6) & 0x3F;
         
-        //Serial.write(lsb0);
-        //Serial.write(msb0);
-        //Serial.write(lsb1);
-        //Serial.write(msb1);
+        Serial.write(lsb0);
+        Serial.write(msb0);
+        Serial.write(lsb1);
+        Serial.write(msb1);
         
-        Serial.print(raw0 / 16);
-        Serial.print(", ");
-        Serial.print(raw1 / 16);
-        Serial.print("\n");
+        //Serial.print(float(raw0) / 16);
+        //Serial.print(", ");
+        //Serial.print(float(raw1) / 16);
+        //Serial.print("\r\n");
 
         t1 = t0;
     }

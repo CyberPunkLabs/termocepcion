@@ -48,7 +48,7 @@ class Chamber:
                         if (self._buffer[1] & 0x40):
                             t2 = -t2
 
-                        measurements.append([t1, t1 * 2])
+                        measurements.append([t1, t2])
 
                         self._buffer = self._buffer[4:]
 
