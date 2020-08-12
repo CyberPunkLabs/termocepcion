@@ -185,10 +185,13 @@ void loop(void)
         uint8_t lsb1 = (raw1 & 0x3F) | 0xC0;
         uint8_t msb1 = (raw1 >> 6) & 0x3F;
         
-        Serial.write(lsb0);
-        Serial.write(msb0);
-        Serial.write(lsb1);
-        Serial.write(msb1);
+        //Serial.write(lsb0);
+        //Serial.write(msb0);
+        //Serial.write(lsb1);
+        //Serial.write(msb1);
+        
+        Serial.print(raw0 / 16)
+        Serial.print(raw1 / 16)
 
         t1 = t0;
     }
